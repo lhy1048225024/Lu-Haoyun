@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define Captain_America return 0
+const int inf=200010;
+int ultron[inf];// 线段树
+int people[inf];
+void construct(int root,int left,int right){
+    //ultron[root].weight=0;可忽略//
+    if(right-left==1){//线段为1（元线段）链接唯一的节点，这一节点是叶子节点
+        scanf("%d",&ultron[root]);
+        return;
+    } 
+    int medium=(left+right)/2;
+    construct(root<<1,left,medium);//root<<1=root*2
+    construct(root<<1|1,medium,right);// root<<1|1=root*2+1
+    ultron[root]=ultron[root<<1]+ultron[root<<1|1];
+}
+int scour(int root,int left,int right,int left_leave,int right_leave){
+    int answer=0;
+    if(left+1>=left_leave && right<=right_leave){
+        return ultron[root];
+    }
+    int medium=(left+right)/2;
+    if(left_leave<=medium) answer+=scour(root<<1,left,medium,left_leave,right_leave);
+    if(right_leave>medium) answer+=scour(root<<1|1,medium,right,left_leave,right_leave);
+    return answer;
+}
+void push_pop(int add,int position,int root,int left,int right){
+    if(right-left==1 && right==position){
+        ultron[root]+=add;
+        return;
+    }
+    int medium=(left+right)/2;
+    if(position<=medium) push_pop(add,position,root<<1,left,medium);
+    else push_pop(add,position,root<<1|1,medium,right);
+    ultron[root]=ultron[root<<1]+ultron[root<<1|1];
+}
+char str[100];
+int main(){
+    int t,t1;
+    scanf("%d",&t);
+    t1=t;
+    while(t--){
+        int n;
+        //v.clear();
+        scanf("%d",&n);
+        /*for(int i=1;i<=n;i++){
+            scanf("%d",&people[i]);
+            //v.push_back(people[i]);
+            /* push(i,1,v[i]);//向线段树中插入v[i]长的线段
+        }*/
+        construct(1,0,n);
+        printf("Case %d:\n",t1-t);
+        while(scanf("%s",str)){
+            int i,j;
+            if(str[0]=='E' && str[1]=='n' && str[2]=='d') break;
+            else if(str[0]=='A' && str[1]=='d' && str[2]=='d'){
+                scanf("%d%d",&i,&j);
+                push_pop(j,i,1,0,n);
+            } 
+            else if(str[0]=='S' && str[1]=='u' && str[2]=='b'){
+                scanf("%d%d",&i,&j);
+                push_pop(-j,i,1,0,n);
+            }
+            else if(str[0]=='Q' && str[1]=='u' && str[2]=='e' && str[3]=='r' && str[4]=='y'){
+                scanf("%d%d",&i,&j);
+                printf("%d\n",scour(1,0,n,i,j));
+            }
+        }
+    }
+    Captain_America;
+}
